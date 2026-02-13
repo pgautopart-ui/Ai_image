@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ส่งข้อมูลผ่าน Webhook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .webhook-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: monospace;
+        }
+
+        .webhook-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .image-boxes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .image-box {
+            border: 3px dashed #d0d0d0;
+            border-radius: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+
+        .image-box:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .image-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .image-box-title {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .image-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: #f0f0f0;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: rgb(255, 59, 48);
+            transform: scale(1.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+            /* ซ่อนไว้ก่อน */
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .image-boxes {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>PGAUTOPART</h1>
+        <p class="subtitle">กรอกข้อมูลและอัพโหลดรูปภาพ (สำหรับโพส Facebook)</p>
+
+        <form id="webhookForm">
+            <div class="form-group">
+                <label for="details">✍️ รายละเอียด</label>
+                <textarea id="details" placeholder="กรุณากรอกรายละเอียดที่ต้องการส่ง..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>🖼️ รูปภาพ (แต่ละกล่องใส่ได้สูงสุด 4 รูป)</label>
+                <div class="image-boxes">
+                    <div class="image-box" data-box="1">
+                        <div class="image-box-header">
+                            <span class="image-box-title">กล่องที่ 1</span>
+                            <span class="image-count">0/4</span>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*" multiple data-box="1">
+                        <div class="upload-area" onclick="document.querySelector('input[data-box=\'1\']').click()">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">คลิกเพื่ือเลือกรูป</div>
+                        </div>
+                        <div class="preview-container"></div>
+                    </div>
+
+                    <div class="image-box" data-box="2">
+                        <div class="image-box-header">
+                            <span class="image-box-title">กล่องที่ 2</span>
+                            <span class="image-count">0/4</span>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*" multiple data-box="2">
+                        <div class="upload-area" onclick="document.querySelector('input[data-box=\'2\']').click()">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">คลิกเพื่อเลือกรูป</div>
+                        </div>
+                        <div class="preview-container"></div>
+                    </div>
+
+                    <div class="image-box" data-box="3">
+                        <div class="image-box-header">
+                            <span class="image-box-title">กล่องที่ 3</span>
+                            <span class="image-count">0/4</span>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*" multiple data-box="3">
+                        <div class="upload-area" onclick="document.querySelector('input[data-box=\'3\']').click()">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">คลิกเพื่อเลือกรูป</div>
+                        </div>
+                        <div class="preview-container"></div>
+                    </div>
+
+                    <div class="image-box" data-box="4">
+                        <div class="image-box-header">
+                            <span class="image-box-title">กล่องที่ 4</span>
+                            <span class="image-count">0/4</span>
+                        </div>
+                        <input type="file" class="hidden" accept="image/*" multiple data-box="4">
+                        <div class="upload-area" onclick="document.querySelector('input[data-box=\'4\']').click()">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">คลิกเพื่อเลือกรูป</div>
+                        </div>
+                        <div class="preview-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="progress-container">
+                <div id="progressBar" class="progress-bar">0%</div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">🚀 ส่งข้อมูล</button>
+        </form>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <script>
+        // ⚙️ กำหนด Webhook URL ที่นี่
+        const WEBHOOK_URL = 'https://n8n.pgauto.store/webhook/IMAGE';
+
+        // ⚙️ ตั้งค่าการบีบอัดรูป
+        const COMPRESSION_CONFIG = {
+            maxWidth: 1080,      // ความกว้างสูงสุด (px) - ลดลงเพื่อ FB
+            maxHeight: 1080,     // ความสูงสูงสุด (px)
+            quality: 0.7,        // คุณภาพ 0-1 (0.7 = 70%) - ลดลงเพื่อความเร็ว
+            type: 'image/jpeg'   // แปลงเป็น JPEG เสมอ (เล็กกว่า PNG)
+        };
+
+        const imageData = {
+            box1: [],
+            box2: [],
+            box3: [],
+            box4: []
+        };
+
+        const MAX_IMAGES_PER_BOX = 4;
+
+        // บีบอัดรูปภาพ
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                img.onload = () => {
+                    let { width, height } = img;
+
+                    // คำนวณขนาดใหม่
+                    if (width > COMPRESSION_CONFIG.maxWidth) {
+                        height = (height * COMPRESSION_CONFIG.maxWidth) / width;
+                        width = COMPRESSION_CONFIG.maxWidth;
+                    }
+                    if (height > COMPRESSION_CONFIG.maxHeight) {
+                        width = (width * COMPRESSION_CONFIG.maxHeight) / height;
+                        height = COMPRESSION_CONFIG.maxHeight;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        // สร้างชื่อไฟล์ใหม่เป็น .jpg
+                        const newName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+                        const compressedFile = new File([blob], newName, { type: 'image/jpeg' });
+                        resolve(compressedFile);
+                    }, COMPRESSION_CONFIG.type, COMPRESSION_CONFIG.quality);
+                };
+
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Handle file input changes
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function (e) {
+                const boxNumber = this.dataset.box;
+                const boxKey = `box${boxNumber}`;
+                const files = Array.from(e.target.files);
+
+                const availableSlots = MAX_IMAGES_PER_BOX - imageData[boxKey].length;
+
+                if (files.length > availableSlots) {
+                    alert(`กล่องที่ ${boxNumber} สามารถใส่รูปได้อีก ${availableSlots} รูปเท่านั้น`);
+                    const filesToAdd = files.slice(0, availableSlots);
+                    addImagesToBox(boxNumber, filesToAdd);
+                } else {
+                    addImagesToBox(boxNumber, files);
+                }
+
+                e.target.value = '';
+            });
+        });
+
+        async function addImagesToBox(boxNumber, files) {
+            const boxKey = `box${boxNumber}`;
+
+            for (const file of files) {
+                if (imageData[boxKey].length < MAX_IMAGES_PER_BOX) {
+                    // บีบอัดรูปก่อน
+                    const compressedFile = await compressImage(file);
+
+                    // สร้าง preview URL
+                    const previewUrl = URL.createObjectURL(compressedFile);
+
+                    imageData[boxKey].push({
+                        name: compressedFile.name,
+                        file: compressedFile,  // เก็บ File object สำหรับส่ง
+                        previewUrl: previewUrl,
+                        originalSize: file.size,
+                        compressedSize: compressedFile.size
+                    });
+
+                    updatePreview(boxNumber);
+                }
+            }
+        }
+
+        function updatePreview(boxNumber) {
+            const boxKey = `box${boxNumber}`;
+            const box = document.querySelector(`.image-box[data-box="${boxNumber}"]`);
+            const previewContainer = box.querySelector('.preview-container');
+            const countSpan = box.querySelector('.image-count');
+
+            countSpan.textContent = `${imageData[boxKey].length}/4`;
+
+            previewContainer.innerHTML = '';
+
+            imageData[boxKey].forEach((image, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+
+                // แสดงขนาดที่ประหยัดได้
+                const savedPercent = Math.round((1 - image.compressedSize / image.originalSize) * 100);
+                const sizeKB = Math.round(image.compressedSize / 1024);
+
+                previewItem.innerHTML = `
+                    <img src="${image.previewUrl}" alt="${image.name}">
+                    <button type="button" class="remove-btn" onclick="removeImage(${boxNumber}, ${index})">×</button>
+                    <div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,0.7);color:#0f0;padding:2px 5px;border-radius:4px;font-size:10px;">${sizeKB}KB (-${savedPercent}%)</div>
+                `;
+                previewContainer.appendChild(previewItem);
+            });
+        }
+
+        function removeImage(boxNumber, index) {
+            const boxKey = `box${boxNumber}`;
+            // Revoke URL เพื่อไม่ให้ memory leak
+            URL.revokeObjectURL(imageData[boxKey][index].previewUrl);
+            imageData[boxKey].splice(index, 1);
+            updatePreview(boxNumber);
+        }
+
+        // Handle form submission - ส่งเป็น Binary (FormData)
+        document.getElementById('webhookForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const details = document.getElementById('details').value;
+            const submitBtn = document.getElementById('submitBtn'); // Use ID we added
+            const statusMessage = document.getElementById('statusMessage');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ กำลังเตรียมไฟล์...';
+            statusMessage.innerHTML = '';
+
+            // Show progress bar
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+
+            // ใช้ FormData แทน JSON
+            const formData = new FormData();
+            formData.append('details', details);
+            formData.append('timestamp', new Date().toISOString());
+
+            // เพิ่มรูปภาพเป็น Binary
+            let imageIndex = 0;
+            for (let boxNum = 1; boxNum <= 4; boxNum++) {
+                const boxKey = `box${boxNum}`;
+                imageData[boxKey].forEach((image, idx) => {
+                    // ชื่อ field: box1_0, box1_1, box2_0 ฯลฯ
+                    formData.append(`box${boxNum}_${idx}`, image.file, image.name);
+                    imageIndex++;
+                });
+            }
+
+            formData.append('totalImages', imageIndex.toString());
+
+            submitBtn.textContent = '🚀 กำลังอัพโหลด...';
+
+            // ใช้ XMLHttpRequest เพื่อดู Progress
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', WEBHOOK_URL, true);
+
+            // ติดตาม Progress การอัพโหลด
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressBar.textContent = percentComplete + '%';
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // Success
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = 'เสร็จสิ้น!';
+                    statusMessage.innerHTML = '<div class="status-message status-success">✅ ส่งข้อมูลสำเร็จ!</div>';
+
+                    setTimeout(() => {
+                        document.getElementById('webhookForm').reset();
+                        // Cleanup memory
+                        [1, 2, 3, 4].forEach(boxNum => {
+                            const boxKey = `box${boxNum}`;
+                            imageData[boxKey].forEach(img => URL.revokeObjectURL(img.previewUrl));
+                            imageData[boxKey] = [];
+                            updatePreview(boxNum);
+                        });
+                        statusMessage.innerHTML = '';
+                        progressContainer.style.display = 'none';
+                    }, 2000);
+                } else {
+                    // Error from server
+                    statusMessage.innerHTML = `<div class="status-message status-error">❌ เกิดข้อผิดพลาด: HTTP ${xhr.status}</div>`;
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 ส่งข้อมูล';
+            };
+
+            xhr.onerror = function () {
+                statusMessage.innerHTML = '<div class="status-message status-error">❌ เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย</div>';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 ส่งข้อมูล';
+            };
+
+            xhr.send(formData);
+        });
+    </script>
+</body>
+
+</html>
